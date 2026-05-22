@@ -101,6 +101,15 @@ The setup script sets all the manual variables for you. The auto-provisioned one
 
 ---
 
+## Roadmap
+
+- **Append-only mode** — on first run, fetch all history back to `FEED_START_DATE`; on subsequent runs, only fetch measurements since the last sync. Reduces Withings API calls as history grows.
+- **`/api/status` endpoint** — returns the last successful sync timestamp from Redis, so you can verify the cron is running without checking Vercel logs.
+- **Input validation in setup script** — validate `FEED_START_DATE` format and `FEED_TIMEZONE` against the IANA database before setting env vars.
+- **Custom domain support** — the setup script currently assumes a `.vercel.app` URL; it should handle custom domains gracefully.
+
+---
+
 ## Re-authorizing
 
 If your Withings token ever becomes invalid (e.g. after a long gap), visit:
