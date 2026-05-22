@@ -135,7 +135,9 @@ function buildIcs(measurements, { feedName, timezone, units }) {
 }
 
 export default async function handler(req, res) {
-  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+  const validCron = req.headers.authorization === `Bearer ${process.env.CRON_SECRET}`;
+  const validSetup = process.env.SETUP_TOKEN && req.query.setup_token === process.env.SETUP_TOKEN;
+  if (!validCron && !validSetup) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -154,12 +156,12 @@ export default async function handler(req, res) {
   const measurements = await fetchMeasurements(accessToken, startDate);
   const ics = buildIcs(measurements, { feedName, timezone, units });
 
-  await put(`weight-${feedName}.ics`, ics, {
+  const blob = await put(`weight-${feedName}.ics`, ics, {
     access: 'public',
     allowOverwrite: true,
     addRandomSuffix: false,
     contentType: 'text/calendar; charset=utf-8',
   });
 
-  res.json({ ok: true, count: measurements.length });
+  res.json({ ok: true, count: measurements.length, url: blob.url });
 }

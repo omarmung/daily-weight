@@ -42,7 +42,7 @@ npm run setup
 The script walks you through everything in six steps:
 
 1. **Pick a project name** — determines your Vercel URL (e.g. `daily-weight-dustin` → `daily-weight-dustin.vercel.app`)
-2. **Create a Withings developer app** — the script gives you the exact callback URL to register
+2. **Create a Withings developer app** — the script gives you the exact callback URL to register; make sure to check "Public API integration" when creating the app
 3. **Configure your feed** — name, start date, timezone, and units
 4. **Connect to Vercel** — links the project and sets all environment variables automatically
 5. **Connect storage** — Upstash Redis (for OAuth tokens) and Vercel Blob (for the `.ics` file), both from the Vercel dashboard
@@ -54,11 +54,7 @@ Total time: about 5 minutes.
 
 ## Subscribing to the feed
 
-After setup, find your `.ics` URL in the Vercel dashboard:
-
-> Your project → Storage → Blob → `weight-{name}.ics` → copy the public URL
-
-Then subscribe in your calendar app:
+At the end of `npm run setup`, the script prints your `.ics` URL directly. Copy it and subscribe in your calendar app:
 
 - **Apple Calendar:** File → New Calendar Subscription → paste the URL
 - **Fantastical:** File → New Calendar Subscription → paste the URL

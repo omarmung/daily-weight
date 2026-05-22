@@ -9,6 +9,7 @@
 import { createInterface } from 'node:readline/promises';
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
+import { randomBytes } from 'node:crypto';
 import { stdin, stdout, exit } from 'node:process';
 
 const rl = createInterface({ input: stdin, output: stdout });
@@ -84,7 +85,9 @@ async function main() {
   console.log('  1. Open this URL in your browser:');
   console.log('\n     https://developer.withings.com/dashboard/\n');
   console.log('  2. Create a new application');
-  console.log('  3. When asked for a callback / redirect URL, enter:\n');
+  console.log('  3. Check the box for "Public API integration"');
+  console.log('     (This lets the app read your measurements via the Withings Data API)');
+  console.log('  4. When asked for a callback / redirect URL, enter:\n');
   console.log(`     ${callbackUrl}\n`);
   await pause('Open the Withings developer portal and create your app, then come back here.');
 
@@ -127,6 +130,7 @@ async function main() {
   }
 
   console.log('\n  Setting environment variables...\n');
+  const setupToken = randomBytes(32).toString('hex');
   const vars = [
     ['WITHINGS_CLIENT_ID', clientId],
     ['WITHINGS_CLIENT_SECRET', clientSecret],
@@ -134,6 +138,7 @@ async function main() {
     ['FEED_START_DATE', startDate],
     ['FEED_TIMEZONE', timezone],
     ['FEED_UNITS', units],
+    ['SETUP_TOKEN', setupToken],
   ];
 
   for (const [name, value] of vars) {
@@ -179,15 +184,37 @@ async function main() {
   console.log('  You should see a "Setup complete" confirmation page.\n');
   await pause('Complete the Withings authorization, then come back.');
 
+  // ── Generate first feed ─────────────────────────────────────
+  console.log('\n  Generating your first weight feed...\n');
+  let feedUrl = null;
+  try {
+    const response = await fetch(`${projectUrl}/api/cron?setup_token=${setupToken}`);
+    const data = await response.json();
+    if (data.ok) {
+      feedUrl = data.url;
+      console.log(`  Done — ${data.count} weight events written.\n`);
+    } else {
+      console.log(`  Cron returned an error: ${JSON.stringify(data)}`);
+    }
+  } catch (e) {
+    console.log(`  Could not reach cron endpoint: ${e.message}`);
+  }
+
+  // Remove setup token now that it has been used
+  vercelCLI(['env', 'rm', 'SETUP_TOKEN', 'production', '--yes']);
+
   // ── Done ────────────────────────────────────────────────────
   hr();
   console.log('Setup complete!\n');
-  console.log('  Your weight feed is live. To find the .ics URL:\n');
-  console.log('  1. Open the Vercel dashboard → your project → Storage → Blob');
-  console.log(`  2. Look for:  weight-${feedName}.ics`);
-  console.log('  3. Copy the public URL\n');
-  console.log('  To subscribe in Apple Calendar:');
-  console.log('  File → New Calendar Subscription → paste the .ics URL\n');
+  if (feedUrl) {
+    console.log('  Your .ics feed URL:\n');
+    console.log(`     ${feedUrl}\n`);
+    console.log('  Subscribe in Apple Calendar:');
+    console.log('  File → New Calendar Subscription → paste the URL above\n');
+  } else {
+    console.log('  The feed could not be generated automatically.');
+    console.log('  Visit your Vercel dashboard → your project → Cron Jobs and trigger it manually.\n');
+  }
   console.log(`  The feed updates daily around 8:30 AM PST / 9:30 AM PDT.\n`);
 
   rl.close();
