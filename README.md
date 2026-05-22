@@ -60,7 +60,7 @@ At the end of `npm run setup`, the script prints your `.ics` URL directly. Copy 
 - **Fantastical:** File → New Calendar Subscription → paste the URL
 - **Google Calendar:** Other calendars → From URL → paste the URL
 
-The calendar app will poll the feed periodically and new weights will appear within a few hours of the cron running.
+The calendar app will poll the feed periodically and new weights will appear within a few hours of the cron running. The cron schedule is set in `vercel.json` — adjust it to fit your timezone.
 
 ---
 

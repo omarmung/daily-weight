@@ -215,7 +215,7 @@ async function main() {
     console.log('  The feed could not be generated automatically.');
     console.log('  Visit your Vercel dashboard → your project → Cron Jobs and trigger it manually.\n');
   }
-  console.log(`  The feed updates daily around 8:30 AM PST / 9:30 AM PDT.\n`);
+  console.log('  The feed updates daily at the schedule configured in vercel.json.\n');
 
   rl.close();
 }
