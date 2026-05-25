@@ -131,6 +131,7 @@ async function main() {
 
   console.log('\n  Setting environment variables...\n');
   const setupToken = randomBytes(32).toString('hex');
+  const cronSecret = randomBytes(32).toString('hex');
   const vars = [
     ['WITHINGS_CLIENT_ID', clientId],
     ['WITHINGS_CLIENT_SECRET', clientSecret],
@@ -138,6 +139,7 @@ async function main() {
     ['FEED_START_DATE', startDate],
     ['FEED_TIMEZONE', timezone],
     ['FEED_UNITS', units],
+    ['CRON_SECRET', cronSecret],
     ['SETUP_TOKEN', setupToken],
   ];
 
